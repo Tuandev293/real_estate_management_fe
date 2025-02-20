@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import buildingService from "../Services/buildingService";
+import buildingService from "../service/buildingService";
 import Input from "../components/Form/Input";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,6 +8,7 @@ import * as yup from "yup";
 import { Button } from "@material-tailwind/react";
 import { HomePageLocal } from "../locales/locales";
 import { IoCloseCircle } from "react-icons/io5";
+
 const typeImg = [
   "image/jpeg",
   "image/jpg",
