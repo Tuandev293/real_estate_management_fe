@@ -61,7 +61,7 @@ function Form() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState();
   const fileInputRef = useRef(null);
-  const url = import.meta.env.APP_URL;
+  const url = import.meta.env.VITE_APP_URL;
 
   const showDeleteModal = () => {
     setIsModalOpen(true);

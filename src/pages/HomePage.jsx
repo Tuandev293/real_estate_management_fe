@@ -21,7 +21,7 @@ function HomePage() {
   const [sortOrder, setSortOrder] = useState("");
   const [search, setSearch] = useState("");
   const [totalRoom, setTotalRoom] = useState(0);
-  const url = import.meta.env.APP_URL;
+  const url = import.meta.env.VITE_APP_URL;
 
   const handleGetDataBuilding = async () => {
     try {
