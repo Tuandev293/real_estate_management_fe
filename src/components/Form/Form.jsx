@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import "./form.css";
-import buildingService from "../../Services/buildingService";
+import buildingService from "../../services/buildingService";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";

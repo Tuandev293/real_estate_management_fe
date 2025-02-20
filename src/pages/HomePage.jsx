@@ -1,7 +1,7 @@
 import { FaPlus } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
 import { IoEyeOutline } from "react-icons/io5";
-import buildingService from "../Services/buildingService";
+import buildingService from "../services/buildingService";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../components/Loading/Loading";
 import { useNavigate } from "react-router-dom";
