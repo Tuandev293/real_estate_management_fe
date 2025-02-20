@@ -61,6 +61,7 @@ function Form() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState();
   const fileInputRef = useRef(null);
+  const url = import.meta.env.APP_URL;
 
   const showDeleteModal = () => {
     setIsModalOpen(true);
@@ -108,9 +109,9 @@ function Form() {
         price: data.formatted_price || "",
         image: null,
       });
-      setPreviewImage(data.url_image || "");
+      setPreviewImage(data.url_image ? `${url}/${data.url_image}` : "");
     }
-  }, [data, reset]);
+  }, [data, reset, url]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

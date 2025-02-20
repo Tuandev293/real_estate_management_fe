@@ -21,6 +21,7 @@ function HomePage() {
   const [sortOrder, setSortOrder] = useState("");
   const [search, setSearch] = useState("");
   const [totalRoom, setTotalRoom] = useState(0);
+  const url = import.meta.env.APP_URL;
 
   const handleGetDataBuilding = async () => {
     try {
@@ -140,7 +141,14 @@ function HomePage() {
             data.data.map((building, index) => (
               <div className="content" key={index}>
                 <div className="image">
-                  <img src={building.url_image ?? notfound} alt="Image" />
+                  <img
+                    src={
+                      building.url_image
+                        ? `${url}/${building.url_image}`
+                        : notfound
+                    }
+                    alt="Image"
+                  />
                 </div>
                 <div className="room">
                   <p className="room-number">{building.room_number} 号室</p>
