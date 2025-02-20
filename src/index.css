@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 80%;
+  background: #f6f7f9;
+  margin: 0 auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header,
+.search-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn {
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.btn-add {
+  padding: 15px 60px;
+  background: #487cf9;
+  color: white;
+}
+
+.btn-search {
+  color: black;
+  padding: 10px 40px;
+  border: 1px solid #ccc;
+}
+
+.btn-detail {
+  color: #3762ee;
+  border: 1px solid #3762ee;
+  padding: 10px;
+}
+
+.header-list {
+  width: 100%;
+  display: flex;
+  padding: 10px;
+  gap: 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+.content {
+  display: flex;
+  padding: 10px;
+  border-radius: 5px;
+  align-items: center;
+  background: #fff;
+  margin-top: 10px;
+  gap: 20px;
+}
+
+.image {
+  width: 20%;
+}
+
+.room {
+  width: 44%;
+}
+
+.price {
+  width: 20%;
+  display: flex;
+  gap: 15px;
+}
+
+.content .image img {
+  width: 50%;
+}
+
+.loading {
+  padding: 20px 0;
+}
+
+.spinner-4 {
+  margin: 0 auto;
+  width: 50px;
+  --b: 8px; /* the border thickness */
+  aspect-ratio: 1;
+  border-radius: 50%;
+  padding: 1px;
+  background: conic-gradient(#0000 10%, #f03355) content-box;
+  -webkit-mask: repeating-conic-gradient(
+      #0000 0deg,
+      #000 1deg 20deg,
+      #0000 21deg 36deg
+    ),
+    radial-gradient(
+      farthest-side,
+      #0000 calc(100% - var(--b) - 1px),
+      #000 calc(100% - var(--b))
+    );
+  -webkit-mask-composite: destination-in;
+  mask-composite: intersect;
+  animation: s4 1s infinite steps(10);
+}
+@keyframes s4 {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.header p {
+  color: #675ab4;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.search-box p {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.header-list p {
+  font-weight: 600;
+  color: #909cb5;
+  font-size: 18px;
+}
+
+.name-building {
+  color: #909cb5;
+  font-weight: 600;
+}
+
+.price {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.btn-search {
+  color: #909cb5;
+  background: #fff;
+}
+
+.btn-box {
+  margin-top: 15px;
+}
+
+.room-number {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.price .short,
+.price .middle {
+  color: #909cb5;
+}
+
+.price .month {
+  color: #909cb5;
+  font-size: 16px;
+}
