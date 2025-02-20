@@ -2,30 +2,90 @@ import { useNavigate, useParams } from "react-router-dom";
 import "./form.css";
 import buildingService from "../../Services/buildingService";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import Modal from "../Modal/Modal";
 import { HomePageLocal } from "../../locales/locales.js";
+import { FormProvider, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { Button } from "@material-tailwind/react";
+import Loading from "../Loading/Loading";
+import { IoCloseCircle } from "react-icons/io5";
+
+const typeImg = ["image/jpeg", "image/jpg", "image/png"];
+const schema = yup
+  .object({
+    name_building: yup.string().required("Name is required"),
+    address: yup.string().required("Address is required"),
+    room_number: yup
+      .number()
+      .typeError("Room Number must be a number")
+      .required("Room number is required")
+      .test("is-integer", "Room Number must be an integer", (value) =>
+        Number.isInteger(value)
+      ),
+    price: yup
+      .number()
+      .transform((value, originalValue) => {
+        if (typeof originalValue === "string") {
+          return Number(originalValue.replace(/,/g, ""));
+        }
+        return value;
+      })
+      .typeError("Price must be a number")
+      .required("Price is required")
+      .test("is-integer", "Price must be an integer", (value) =>
+        Number.isInteger(value)
+      ),
+    image: yup
+      .mixed()
+      .nullable()
+      .test("fileType", "Only image files are allowed", (value) => {
+        if (!value) return true;
+        if (value instanceof FileList) {
+          return (
+            value.length === 0 ||
+            (value[0] instanceof File && typeImg.includes(value[0].type))
+          );
+        }
+        return value instanceof File && typeImg.includes(value.type);
+      }),
+  })
+  .required();
 
 function Form() {
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const [dataUpdate, setDataUpdate] = useState({
-    name_building: "",
-    address: "",
-    room_number: "",
-    price: "",
-    url_image: "",
-  });
-
+  const [previewImage, setPreviewImage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState();
+  const fileInputRef = useRef(null);
 
   const showDeleteModal = () => {
     setIsModalOpen(true);
   };
 
-  const [previewImage, setPreviewImage] = useState(null);
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name_building: "",
+      address: "",
+      room_number: "",
+      price: "",
+      image: null,
+    },
+    mode: "onChange",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    trigger,
+    formState: { errors },
+  } = methods;
 
   const { isLoading, data } = useQuery({
     queryKey: ["detail", id],
@@ -41,84 +101,76 @@ function Form() {
 
   useEffect(() => {
     if (data) {
-      setDataUpdate({
+      reset({
         name_building: data.name_building || "",
         address: data.address || "",
         room_number: data.room_number || "",
         price: data.formatted_price || "",
-        url_image: data.url_image || "",
+        image: null,
       });
-
       setPreviewImage(data.url_image || "");
     }
-  }, [data]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setDataUpdate((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  }, [data, reset]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-
     if (file) {
-      setDataUpdate((prevData) => ({
-        ...prevData,
-        url_image: file,
-      }));
-
+      if (!typeImg.includes(file.type)) {
+        setPreviewImage(null);
+        trigger("image");
+        return;
+      }
+      setValue("image", e.target.files);
       const imageURL = URL.createObjectURL(file);
       setPreviewImage(imageURL);
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (previewImage && previewImage.startsWith("blob:")) {
-        URL.revokeObjectURL(previewImage);
-      }
-    };
-  }, [previewImage]);
+  const handleRemoveImage = () => {
+    setPreviewImage(null);
+    setValue("image", null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
-  const handleUpdateBuilding = async (e) => {
-    e.preventDefault();
-
+  const onSubmit = async (values) => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("name_building", values.name_building);
+    formData.append("address", values.address);
+    formData.append("room_number", values.room_number);
+    formData.append("price", values.price);
+    if (values.image && values.image.length > 0) {
+      formData.append("image", values.image[0]);
+    }
     try {
-      const formData = new FormData();
-      formData.append("name_building", dataUpdate.name_building);
-      formData.append("address", dataUpdate.address);
-      formData.append("room_number", dataUpdate.room_number);
-      formData.append("price", dataUpdate.price);
-
-      if (dataUpdate.url_image instanceof File) {
-        formData.append("image", dataUpdate.url_image);
-      }
-
       const req = await buildingService.update(id, formData);
       toast.success(req.message, {
         position: "top-right",
         autoClose: 1000,
       });
+
+      if (req.status === "success") {
+        setTimeout(() => {
+          navigate("/");
+        }, 1100);
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteBuilding = async () => {
     try {
       const res = await buildingService.delete(id);
+      setIsModalOpen(false);
       toast.success(res.message, {
         position: "top-right",
         autoClose: 1000,
       });
-
-      if (res.status == "success") {
-        navigate("/");
-      }
-
       if (res.status === "success") {
         setTimeout(() => {
           navigate("/");
@@ -133,86 +185,101 @@ function Form() {
     <div className="container">
       <ToastContainer />
       {isLoading ? (
-        <p>Loading...</p>
+        <Loading />
       ) : (
-        <form>
-          <label>{HomePageLocal.name}</label>
-          <input
-            type="text"
-            name="name_building"
-            placeholder={HomePageLocal.name}
-            value={dataUpdate.name_building}
-            onChange={handleChange}
-            className="mb-2 input-text"
-          />
-
-          <label>{HomePageLocal.address}</label>
-          <input
-            type="text"
-            name="address"
-            placeholder={HomePageLocal.address}
-            value={dataUpdate.address}
-            onChange={handleChange}
-            className="mb-2 input-text"
-          />
-
-          <label>{HomePageLocal.room_number}</label>
-          <input
-            type="text"
-            name="room_number"
-            placeholder={HomePageLocal.room_number}
-            value={dataUpdate.room_number}
-            onChange={handleChange}
-            className="mb-2 input-text"
-          />
-
-          <label>{HomePageLocal.price_title}</label>
-          <input
-            type="text"
-            name="price"
-            placeholder={HomePageLocal.price_title}
-            value={dataUpdate.price}
-            onChange={handleChange}
-            className="mb-2 input-text"
-          />
-
-          <label>{HomePageLocal.image}</label>
-          <input
-            type="file"
-            className="input-file"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-          {previewImage && (
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="mt-2 w-[300px] h-[150px] object-cover"
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <label>{HomePageLocal.name}</label>
+            <input
+              type="text"
+              name="name_building"
+              placeholder={HomePageLocal.name}
+              {...register("name_building")}
+              className="mb-2 input-text"
             />
-          )}
+            {errors.name_building && (
+              <p className="text-red-500">{errors.name_building.message}</p>
+            )}
 
-          <div className="btn-box">
-            <button
-              className="btn-update bg-blue-600"
-              type="button"
-              onClick={handleUpdateBuilding}
-            >
-              {HomePageLocal.update}
-            </button>
-            <button
-              className="btn-delete bg-red-600"
-              type="button"
-              onClick={showDeleteModal}
-            >
-              {HomePageLocal.delete_button}
-            </button>
-          </div>
-          <Modal
-            isModalOpen={isModalOpen}
-            handleOk={handleDeleteBuilding}
-            handleCancel={() => setIsModalOpen(false)}
-          />
-        </form>
+            <label>{HomePageLocal.address}</label>
+            <input
+              type="text"
+              name="address"
+              placeholder={HomePageLocal.address}
+              {...register("address")}
+              className="mb-2 input-text"
+            />
+            {errors.address && (
+              <p className="text-red-500">{errors.address.message}</p>
+            )}
+
+            <label>{HomePageLocal.room_number}</label>
+            <input
+              type="text"
+              name="room_number"
+              placeholder={HomePageLocal.room_number}
+              {...register("room_number")}
+              className="mb-2 input-text"
+            />
+            {errors.room_number && (
+              <p className="text-red-500">{errors.room_number.message}</p>
+            )}
+
+            <label>{HomePageLocal.price_title}</label>
+            <input
+              type="text"
+              name="price"
+              placeholder={HomePageLocal.price_title}
+              {...register("price")}
+              className="mb-2 input-text"
+            />
+            {errors.price && (
+              <p className="text-red-500">{errors.price.message}</p>
+            )}
+
+            <label>{HomePageLocal.image}</label>
+            <input
+              type="file"
+              className="input-file"
+              name="image"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {errors.image && (
+              <p className="text-red-500 text-sm">{errors.image.message}</p>
+            )}
+
+            {previewImage && (
+              <div className="relative">
+                <IoCloseCircle
+                  size={24}
+                  className="absolute left-[276px] top-1 cursor-pointer"
+                  onClick={handleRemoveImage}
+                />
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  className="mt-2 w-[300px] h-[150px] object-cover"
+                />
+              </div>
+            )}
+
+            <div className="btn-box">
+              <Button type="submit" color="blue" loading={loading}>
+                {HomePageLocal.update}
+              </Button>
+              <Button type="button" color="red" onClick={showDeleteModal}>
+                {HomePageLocal.delete_button}
+              </Button>
+            </div>
+            <Modal
+              isModalOpen={isModalOpen}
+              handleOk={handleDeleteBuilding}
+              handleCancel={() => setIsModalOpen(false)}
+            />
+          </form>
+        </FormProvider>
       )}
     </div>
   );

@@ -181,14 +181,22 @@ function HomePage() {
         </div>
       </div>
       <div className="pagination">
-        <button onClick={handlePrevPage} disabled={currentPage === 1}>
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          className="bg-white border border-gray-300 px-4 py-2 rounded-md cursor-pointer disabled:cursor-not-allowed"
+        >
           <GrFormPrevious size={20} />
         </button>
         <p>
           {currentPage} of {totalPages}
         </p>
 
-        <button onClick={handleNextPage} disabled={currentPage === lastPage}>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === lastPage}
+          className="bg-white border border-gray-300 px-4 py-2 rounded-md cursor-pointer disabled:cursor-not-allowed"
+        >
           <MdOutlineNavigateNext size={20} />
         </button>
       </div>

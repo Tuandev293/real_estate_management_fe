@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@material-tailwind/react";
 import { HomePageLocal } from "../locales/locales";
+import { IoCloseCircle } from "react-icons/io5";
 const typeImg = [
   "image/jpeg",
   "image/jpg",
@@ -47,11 +48,13 @@ function AddPage() {
     mode: "onChange",
   });
   const [loading, setLoading] = useState();
+
   const {
     handleSubmit,
     register,
     trigger,
     reset,
+    setValue,
     formState: { errors },
   } = methods;
   const handleFileChange = (e) => {
@@ -70,11 +73,17 @@ function AddPage() {
     }
   };
 
+  const handleRemoveImage = () => {
+    setPreviewImage(null);
+    setImage(null);
+    setValue("image", null);
+  };
+
   const handleCreateBuilding = async (value) => {
     setLoading(true);
-    const { name, address, room_number, price } = value;
+    const { name_building, address, room_number, price } = value;
     const formData = new FormData();
-    formData.append("name_building", name);
+    formData.append("name_building", name_building);
     formData.append("address", address);
     formData.append("room_number", room_number);
     formData.append("price", price);
@@ -143,13 +152,19 @@ function AddPage() {
             )}
           </div>
           {previewImage && (
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="mt-2 w-[300px] h-[150px] object-cover"
-            />
+            <div className="relative">
+              <IoCloseCircle
+                size={24}
+                className="absolute left-[276px] top-1 cursor-pointer"
+                onClick={handleRemoveImage}
+              />
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="mt-2 w-[300px] h-[150px] object-cover"
+              />
+            </div>
           )}
-
           <div className="btn-box">
             <Button loading={loading} type="submit" color="blue">
               {HomePageLocal.add}
