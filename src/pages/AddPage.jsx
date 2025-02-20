@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import buildingService from "../service/buildingService";
+import buildingService from "../services/buildingService";
 import Input from "../components/Form/Input";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
